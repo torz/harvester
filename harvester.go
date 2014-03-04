@@ -3,21 +3,19 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	//"os"
 	"net/http"
 	"net/url"
 	"crypto/tls"
 	"sync"
 )
 
-var wg sync.WaitGroup
 /* 
    check stuff here http://httpbin.org/
    my ip http://httpbin.org/ip
    my user agent http://httpbin.org/user-agent
-   proxies 202.195.244.211:8080 93.170.36.3:1080
-   124.67.215.9	85.114.141.191
 */
+
+var wg sync.WaitGroup
 
 type Harvester struct {
 	proxy		string
@@ -60,10 +58,8 @@ func main() {
 		go func(i int){
 			h := Harvester{}
 			h.proxy = myproxy[i]
-			fmt.Println(h.proxy)
 			h.userAgent = myuas[i]
 			h.setClient()
-			//fmt.Printf("%v\n", h.client.Transport)
 			h.get(mysites[0])
 			h.get(mysites[1])
 			wg.Done()
