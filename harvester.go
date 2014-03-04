@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"crypto/tls"
 	"sync"
+	"time"
 )
 
 /* 
@@ -28,9 +29,12 @@ func (h *Harvester) setClient() {
 	urli :=url.URL{}
 	urlProxy, _ := urli.Parse(h.proxy)
 
+	timeout := time.Duration(5 * time.Second)
+
 	transport := http.Transport{}
 	transport.Proxy = http.ProxyURL(urlProxy)
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	transport.ResponseHeaderTimeout = timeout
 
 	h.client = http.Client{}
 	h.client.Transport = &transport
@@ -41,7 +45,11 @@ func (h *Harvester) get(myurl string) {
 	myreq, _ := http.NewRequest("GET", myurl, nil)
 	myreq.Header.Set("User-Agent", h.userAgent)
 
-	resp, _ := h.client.Do(myreq)
+	resp, err := h.client.Do(myreq)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
