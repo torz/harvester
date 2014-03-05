@@ -29,7 +29,7 @@ func (h *Harvester) setClient() {
 	urli :=url.URL{}
 	urlProxy, _ := urli.Parse(h.proxy)
 
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(8 * time.Second)
 
 	transport := http.Transport{}
 	transport.Proxy = http.ProxyURL(urlProxy)
@@ -52,16 +52,20 @@ func (h *Harvester) get(myurl string) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
 	fmt.Printf("%s\n", body)
 }
 
 func main() {
 	mysites := []string{"http://httpbin.org/ip", "http://httpbin.org/user-agent", "http://httpbin.org/headers"}
-	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/"}
-	myuas := []string{"chrome", "firefox", "ie"}
+	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/", "http://94.205.181.212/" ,"http://173.201.95.24/"}
+	myuas := []string{"chrome", "firefox", "ie", "opera", "safari"}
 
-	for i := range myuas {
+	for i := range myproxy {
 		wg.Add(1)
 		go func(i int){
 			h := Harvester{}
@@ -71,7 +75,7 @@ func main() {
 			h.get(mysites[0])
 			h.get(mysites[1])
 			wg.Done()
-		}(i);
+		}(i)
 	}
 	wg.Wait()
 }
