@@ -1,4 +1,4 @@
 harvester
 =========
 
-web harvester in go
+web harvester in go with some other fancies.
