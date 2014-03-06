@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Processor</h1>
+
+{% for msg in message %}
+<p><font size="4" color="red">{{msg}}</font></p>
+{% endfor %}
+
+{% endblock %}
