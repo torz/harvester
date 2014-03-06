@@ -22,9 +22,10 @@ type Harvester struct {
 	proxy		string
 	client		http.Client
 	userAgent	string
+	//resp		[]byte
 }
 
-func (h *Harvester) setClient() {
+func (h *Harvester) setClientProxy() {
 
 	urli :=url.URL{}
 	urlProxy, _ := urli.Parse(h.proxy)
@@ -40,7 +41,7 @@ func (h *Harvester) setClient() {
 	h.client.Transport = &transport
 }
 
-func (h *Harvester) get(myurl string) {
+func (h *Harvester) get(myurl string) (body []byte) {
 
 	myreq, _ := http.NewRequest("GET", myurl, nil)
 	myreq.Header.Set("User-Agent", h.userAgent)
@@ -52,18 +53,24 @@ func (h *Harvester) get(myurl string) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("%s\n", body)
+	//fmt.Printf("%s\n", body)
+	return
 }
 
 func main() {
+	datasource := "http://localhost:8888/urls"
+
 	mysites := []string{"http://httpbin.org/ip", "http://httpbin.org/user-agent", "http://httpbin.org/headers"}
-	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/", "http://94.205.181.212/" ,"http://173.201.95.24/"}
+	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/", "http://94.205.181.212/"}
 	myuas := []string{"chrome", "firefox", "ie", "opera", "safari"}
+
+	jsonharvester := Harvester{}
+	fmt.Printf("%s\n", jsonharvester.get(datasource))
 
 	for i := range myproxy {
 		wg.Add(1)
@@ -71,9 +78,9 @@ func main() {
 			h := Harvester{}
 			h.proxy = myproxy[i]
 			h.userAgent = myuas[i]
-			h.setClient()
-			h.get(mysites[0])
-			h.get(mysites[1])
+			h.setClientProxy()
+			fmt.Printf("%s\n", h.get(mysites[0]))
+			fmt.Printf("%s\n", h.get(mysites[1]))
 			wg.Done()
 		}(i)
 	}

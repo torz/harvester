@@ -8,8 +8,8 @@ def index():
 
 @app.route('/urls')
 def urls_to_get():
-	harvest = {'harvest': [{'id': 0, 'url': 'http://bbc.co.uk'},
-							{'id': 1, 'url': 'http://www.imdb.com/'},
-							{'id': 2, 'url': 'http://distrowatch.com/'}]}
+	harvest = {'harvest': [{'id': 0, 'url': 'http://httpbin.org/ip'},
+							{'id': 1, 'url': 'http://httpbin.org/user-agent'},
+							{'id': 2, 'url': 'http://httpbin.org/headers'}]}
 	return jsonify(harvest)
 
