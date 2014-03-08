@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"sync"
 	"time"
+	"math/rand"
 )
 
 /* 
@@ -19,18 +20,19 @@ import (
 var wg sync.WaitGroup
 
 type Harvester struct {
-	proxy		string
-	client		http.Client
-	userAgent	string
-	//resp		[]byte
+	client			http.Client
+	userAgent		string
+	proxyAddress	string
+	url				string
 }
 
-func (h *Harvester) setClientProxy() {
+func (h *Harvester) setClientProxy(proxyAddress string) {
 
 	urli :=url.URL{}
-	urlProxy, _ := urli.Parse(h.proxy)
+	h.proxyAddress = proxyAddress
+	urlProxy, _ := urli.Parse(h.proxyAddress)
 
-	timeout := time.Duration(8 * time.Second)
+	timeout := time.Duration(5 * time.Second)
 
 	transport := http.Transport{}
 	transport.Proxy = http.ProxyURL(urlProxy)
@@ -58,29 +60,33 @@ func (h *Harvester) get(myurl string) (body []byte) {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	//fmt.Printf("%s\n", body)
 	return
 }
 
 func main() {
-	datasource := "http://localhost:8888/urls"
+	datasource := "http://localhost:5000/urls"
 
 	mysites := []string{"http://httpbin.org/ip", "http://httpbin.org/user-agent", "http://httpbin.org/headers"}
-	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/", "http://94.205.181.212/"}
+	myproxy := []string{"http://183.224.1.30/", "http://221.130.23.150/", "http://221.130.23.144/"}
 	myuas := []string{"chrome", "firefox", "ie", "opera", "safari"}
 
 	jsonharvester := Harvester{}
 	fmt.Printf("%s\n", jsonharvester.get(datasource))
 
-	for i := range myproxy {
+	for i := range mysites {
 		wg.Add(1)
 		go func(i int){
 			h := Harvester{}
-			h.proxy = myproxy[i]
-			h.userAgent = myuas[i]
-			h.setClientProxy()
+			x := rand.Intn(len(myuas))
+			fmt.Println("x is: ", x)
+			h.userAgent = myuas[x]
+			y := rand.Intn(len(myproxy))
+			fmt.Println("pr length: ", len(myproxy))
+			fmt.Println("y is: ", y)
+			h.setClientProxy(myproxy[y])
 			fmt.Printf("%s\n", h.get(mysites[0]))
 			fmt.Printf("%s\n", h.get(mysites[1]))
+			fmt.Printf("%s\n", h.get(mysites[2]))
 			wg.Done()
 		}(i)
 	}
